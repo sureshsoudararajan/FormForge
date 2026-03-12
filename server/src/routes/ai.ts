@@ -438,4 +438,24 @@ router.post('/detect-language', async (req: Request, res: Response) => {
   }
 });
 
+// Translate text to English
+router.post('/translate-to-english', async (req: Request, res: Response) => {
+  try {
+    const { text } = req.body;
+    if (!text || text.length < 2) return res.json({ translated: text });
+
+    const prompt = `Translate this text to natural English: "${text}"
+    
+    Return ONLY the translated English text. No quotes, no markdown, no explanation.`;
+
+    const result = await callAI(prompt);
+    const cleanResult = result.replace(/^["']|["']$/g, '').trim();
+    
+    res.json({ translated: cleanResult || text });
+  } catch (error) {
+    console.error('Translation error:', error);
+    res.json({ translated: req.body.text });
+  }
+});
+
 export default router;

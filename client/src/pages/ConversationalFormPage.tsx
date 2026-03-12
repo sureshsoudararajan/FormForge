@@ -97,6 +97,7 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
   const [currentLanguage, setCurrentLanguage] = useState<string>('en');
   const [preFillBuffer, setPreFillBuffer] = useState<Record<string, any>>({});
   const [isListening, setIsListening] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -176,6 +177,23 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
+      
+      // Auto-translate to English if needed
+      const handleTranslation = async () => {
+        if (!inputValue.trim()) return;
+        setIsTranslating(true);
+        try {
+          const res = await api.post('/ai/translate-to-english', { text: inputValue });
+          setInputValue(res.data.translated);
+        } catch (err) {
+          console.error('Translation failed:', err);
+        } finally {
+          setIsTranslating(false);
+        }
+      };
+      
+      // Delay slightly to ensure browser finishes transcription
+      setTimeout(handleTranslation, 500);
     } else {
       setInputValue('');
       recognitionRef.current.start();
@@ -542,7 +560,7 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                         handleSend();
                       }
                     }}
-                    placeholder={isListening ? "Listening..." : "Type your answer..."}
+                    placeholder={isListening ? "Listening..." : isTranslating ? "Translating..." : "Type your answer..."}
                     className="w-full bg-transparent border-none text-gray-100 placeholder:text-gray-500 px-2 py-3 focus:outline-none resize-none min-h-[50px] max-h-32 text-[15px]"
                     rows={1}
                     autoFocus
