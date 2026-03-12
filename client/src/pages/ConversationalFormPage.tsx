@@ -98,6 +98,8 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
   const [preFillBuffer, setPreFillBuffer] = useState<Record<string, any>>({});
   const [isListening, setIsListening] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [voiceLanguage, setVoiceLanguage] = useState('en-US');
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -177,29 +179,27 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
-      
-      // Auto-translate to English if needed
-      const handleTranslation = async () => {
-        if (!inputValue.trim()) return;
-        setIsTranslating(true);
-        try {
-          const res = await api.post('/ai/translate-to-english', { text: inputValue });
-          setInputValue(res.data.translated);
-        } catch (err) {
-          console.error('Translation failed:', err);
-        } finally {
-          setIsTranslating(false);
-        }
-      };
-      
-      // Delay slightly to ensure browser finishes transcription
-      setTimeout(handleTranslation, 500);
     } else {
       setInputValue('');
+      if (recognitionRef.current) {
+        recognitionRef.current.lang = voiceLanguage;
+      }
       recognitionRef.current.start();
       setIsListening(true);
+      setShowLangMenu(false);
     }
   };
+
+  const languages = [
+    { code: 'en-US', name: 'English' },
+    { code: 'ta-IN', name: 'Tamil (தமிழ்)' },
+    { code: 'hi-IN', name: 'Hindi (हिन्दी)' },
+    { code: 'ml-IN', name: 'Malayalam (മലയാളം)' },
+    { code: 'te-IN', name: 'Telugu (తెలుగు)' },
+    { code: 'kn-IN', name: 'Kannada (ಕನ್ನಡ)' },
+    { code: 'es-ES', name: 'Spanish' },
+    { code: 'fr-FR', name: 'French' },
+  ];
 
   const askQuestion = async (q: Question, isFirst: boolean = false) => {
     setIsTyping(true);
@@ -540,12 +540,37 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
               </div>
             ) : (
               <div className="relative flex items-end gap-2">
+                {showLangMenu && !isListening && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute bottom-full left-0 mb-2 bg-gray-900 border border-gray-700 rounded-xl overflow-hidden shadow-2xl z-50 min-w-[200px]"
+                  >
+                    <div className="p-2 border-b border-gray-800 text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                      Select Input Language
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {languages.map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => {
+                            setVoiceLanguage(lang.code);
+                            toggleListening();
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-600 transition-colors ${voiceLanguage === lang.code ? 'text-blue-400 font-bold' : 'text-gray-300'}`}
+                        >
+                          {lang.name}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
                 <div className={`bg-gray-900 rounded-2xl border ${isListening ? 'border-red-500 ring-2 ring-red-500/20' : 'border-gray-700 focus-within:border-blue-500'} transition-all flex-1 p-2 flex items-center shadow-lg`}>
                   <button 
                     type="button" 
-                    onClick={toggleListening}
-                    className={`p-3 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-white'}`}
-                    title={isListening ? 'Stop recording' : 'Start voice input'}
+                    onClick={() => setShowLangMenu(!showLangMenu)}
+                    className={`p-3 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-white'} ${showLangMenu ? 'text-blue-400' : ''}`}
+                    title={isListening ? 'Stop recording' : 'Select language and record'}
                   >
                     {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                   </button>
