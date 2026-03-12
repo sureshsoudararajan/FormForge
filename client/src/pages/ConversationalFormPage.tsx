@@ -170,6 +170,12 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shareToken]);
 
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in your browser.');
+      return;
+    }
+
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
