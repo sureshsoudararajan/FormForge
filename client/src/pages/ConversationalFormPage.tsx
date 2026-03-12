@@ -55,6 +55,8 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
   const [isUploading, setIsUploading] = useState(false);
   const [currentSentiment, setCurrentSentiment] = useState<string | null>(null);
   const [preFillBuffer, setPreFillBuffer] = useState<Record<string, any>>({});
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
@@ -89,8 +91,56 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
     };
     
     startSession();
+
+    // Initialize Speech Recognition
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event: any) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setInputValue(transcript);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shareToken]);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in your browser.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      setInputValue('');
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   const askQuestion = async (q: Question, isFirst: boolean = false) => {
     setIsTyping(true);
@@ -412,13 +462,14 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
               </div>
             ) : (
               <div className="relative flex items-end gap-2">
-                <div className="bg-gray-900 rounded-2xl border border-gray-700 focus-within:border-blue-500 transition-colors flex-1 p-2 flex items-center shadow-lg">
+                <div className={`bg-gray-900 rounded-2xl border ${isListening ? 'border-red-500 ring-2 ring-red-500/20' : 'border-gray-700 focus-within:border-blue-500'} transition-all flex-1 p-2 flex items-center shadow-lg`}>
                   <button 
                     type="button" 
-                    className="p-3 text-gray-400 hover:text-white transition-colors"
-                    title="Voice input coming soon"
+                    onClick={toggleListening}
+                    className={`p-3 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-white'}`}
+                    title={isListening ? 'Stop recording' : 'Start voice input'}
                   >
-                    <Mic className="w-5 h-5" />
+                    {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                   </button>
 
                   <textarea
@@ -427,17 +478,21 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
+                        if (isListening) toggleListening();
                         handleSend();
                       }
                     }}
-                    placeholder="Type your answer..."
+                    placeholder={isListening ? "Listening..." : "Type your answer..."}
                     className="w-full bg-transparent border-none text-gray-100 placeholder:text-gray-500 px-2 py-3 focus:outline-none resize-none min-h-[50px] max-h-32 text-[15px]"
                     rows={1}
                     autoFocus
                   />
 
                   <button
-                    onClick={handleSend}
+                    onClick={() => {
+                      if (isListening) toggleListening();
+                      handleSend();
+                    }}
                     disabled={!inputValue.trim()}
                     className="p-3"
                   >
