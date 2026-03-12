@@ -53,6 +53,8 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
   const [isCompleted, setIsCompleted] = useState(false);
   const [tone, setTone] = useState('friendly');
   const [isUploading, setIsUploading] = useState(false);
+  const [currentSentiment, setCurrentSentiment] = useState<string | null>(null);
+  const [preFillBuffer, setPreFillBuffer] = useState<Record<string, any>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
@@ -100,7 +102,8 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
       const res = await api.post(`/ai/rephrase`, { 
         question: questionText, 
         tone, 
-        isFirst 
+        isFirst,
+        sentiment: currentSentiment
       });
       const data = res.data;
       
@@ -142,6 +145,14 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
       });
       const parseData = parseRes.data;
 
+      // 2.5 Detect sentiment
+      try {
+        const sentimentRes = await api.post('/ai/detect-sentiment', { answer: userAns });
+        setCurrentSentiment(sentimentRes.data.sentiment);
+      } catch (err) {
+        console.error('Sentiment detection failed:', err);
+      }
+
       // 3. Submit answer to session, get next question
       const submitRes = await api.post(`/session/${sessionId}/answer`, { 
         questionId: currentQuestion.id, 
@@ -156,8 +167,32 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
         setIsCompleted(true);
         setIsTyping(false);
       } else {
-        // Ask next question
-        await askQuestion(submitData.nextQuestion);
+        // Check if NEXT question is in pre-fill buffer
+        const nextQ = submitData.nextQuestion;
+        if (preFillBuffer[nextQ.id]) {
+          // Auto-submit from buffer
+          setMessages(prev => [...prev, { 
+            id: Date.now().toString(), 
+            type: 'ai', 
+            content: `I've found the answer for "${nextQ.text || nextQ.label}" in your document: "${preFillBuffer[nextQ.id]}"` 
+          }]);
+          
+          const autoSubmitRes = await api.post(`/session/${sessionId}/answer`, { 
+            questionId: nextQ.id, 
+            rawAnswer: preFillBuffer[nextQ.id].toString(),
+            parsedAnswer: preFillBuffer[nextQ.id]
+          });
+          
+          if (autoSubmitRes.data.done) {
+            await api.post(`/session/${sessionId}/complete`);
+            setIsCompleted(true);
+            setIsTyping(false);
+          } else {
+            await askQuestion(autoSubmitRes.data.nextQuestion);
+          }
+        } else {
+          await askQuestion(nextQ);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -220,7 +255,38 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
         setIsCompleted(true);
         setIsTyping(false);
       } else {
-        await askQuestion(submitData.nextQuestion);
+        // TRIGGER MAGIC FILL if it's a doc
+        if (fileExt === '.pdf' || fileExt === '.txt' || fileExt === '.docx') {
+          setMessages(prev => [...prev, { 
+            id: Date.now().toString(), 
+            type: 'ai', 
+            content: "Magically reading your document to pre-fill the rest of the form... ✨" 
+          }]);
+          
+          try {
+            const magicRes = await api.post('/magic-fill/parse-document', {
+              filePath,
+              questions: questions.filter(q => q.id !== currentQuestion.id)
+            });
+            setPreFillBuffer(magicRes.data.mapping);
+            
+            // If the VERY NEXT question is now in buffer, we should handle it
+            const nextQ = submitData.nextQuestion;
+            if (magicRes.data.mapping[nextQ.id]) {
+               // We'll let the handleSend-like logic above handle the chain, or just ask here
+               await askQuestion(nextQ); // It will handle rephrasing, then maybe we can auto-submit in a useEffect or similar. 
+               // For now, let's keep it simple: next time askQuestion runs, it will show the rephrased question.
+               // Actually, let's just trigger another skip cycle.
+            } else {
+               await askQuestion(nextQ);
+            }
+          } catch (err) {
+            console.error('Magic fill failed:', err);
+            await askQuestion(submitData.nextQuestion);
+          }
+        } else {
+          await askQuestion(submitData.nextQuestion);
+        }
       }
     } catch (err) {
       console.error('Upload failed:', err);

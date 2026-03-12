@@ -273,8 +273,10 @@ router.post('/rephrase', async (req: Request, res: Response) => {
     }
 
     const prompt = `Rewrite this form question naturally using a ${tone} tone.
-Original question: "${question}"
 ${isFirst ? 'This is the FIRST question in the conversation, so include a very brief, natural greeting.' : ''}
+${req.body.sentiment ? `IMPORTANT: The user seems ${req.body.sentiment}. Adjust your response to be empathetic to this mood.` : ''}
+
+Original question: "${question}"
 
 RULES:
 - Keep the core meaning and intent EXACTLY the same.
@@ -388,6 +390,28 @@ Return ONLY the JSON object. No markdown, no explanation, no code fences.`;
   } catch (error: any) {
     console.error('Analyze error:', error);
     res.status(500).json({ error: 'Failed to generate analytics' });
+  }
+});
+
+// Detect sentiment of a response
+router.post('/detect-sentiment', async (req: Request, res: Response) => {
+  try {
+    const { answer } = req.body;
+    if (!answer) return res.json({ sentiment: 'neutral' });
+
+    const prompt = `Analyze the sentiment of this user response in a form: "${answer}"
+    
+    Categorize it as exactly one of: "happy", "frustrated", "detailed", "hurried", or "neutral".
+    
+    Return ONLY the category word. No punctuation.`;
+
+    const result = await callAI(prompt);
+    const sentiment = result.toLowerCase().trim().replace(/[^a-z]/g, '');
+    
+    res.json({ sentiment: ['happy', 'frustrated', 'detailed', 'hurried', 'neutral'].includes(sentiment) ? sentiment : 'neutral' });
+  } catch (error) {
+    console.error('Sentiment detection error:', error);
+    res.json({ sentiment: 'neutral' });
   }
 });
 
