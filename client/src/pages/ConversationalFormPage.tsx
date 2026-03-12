@@ -263,26 +263,36 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
     setCurrentQuestion(null); // hide inputs while processing
 
     try {
+      let finalAns = userAns;
+      
+      // Auto-translate to English if not already English (AI will decide)
+      try {
+        const transRes = await api.post('/ai/translate-to-english', { text: userAns });
+        finalAns = transRes.data.translated;
+      } catch (err) {
+        console.error('Translation failed, storage will use raw input:', err);
+      }
+
       const questionText = currentQuestion.text || currentQuestion.label || '';
       // 2. Parse answer via AI
       const parseRes = await api.post(`/ai/parse-answer`, { 
         question: questionText, 
-        answer: userAns 
+        answer: finalAns 
       });
       const parseData = parseRes.data;
 
       // 2.5 Detect sentiment
       try {
-        const sentimentRes = await api.post('/ai/detect-sentiment', { answer: userAns });
+        const sentimentRes = await api.post('/ai/detect-sentiment', { answer: finalAns });
         setCurrentSentiment(sentimentRes.data.sentiment);
       } catch (err) {
         console.error('Sentiment detection failed:', err);
       }
 
-      // 3. Submit answer to session, get next question
+      // 3. Submit translated answer to session
       const submitRes = await api.post(`/session/${sessionId}/answer`, { 
         questionId: currentQuestion.id, 
-        rawAnswer: userAns,
+        rawAnswer: finalAns,
         parsedAnswer: parseData.parsed
       });
       const submitData = submitRes.data;
