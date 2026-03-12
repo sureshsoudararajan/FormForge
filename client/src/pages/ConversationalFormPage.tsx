@@ -197,24 +197,12 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
     } else {
       setInputValue('');
       if (recognitionRef.current) {
-        recognitionRef.current.lang = voiceLanguage;
+        recognitionRef.current.lang = ''; // browser default/auto
       }
       recognitionRef.current.start();
       setIsListening(true);
-      setShowLangMenu(false);
     }
   };
-
-  const languages = [
-    { code: 'en-US', name: 'English' },
-    { code: 'ta-IN', name: 'Tamil (தமிழ்)' },
-    { code: 'hi-IN', name: 'Hindi (हिन्दी)' },
-    { code: 'ml-IN', name: 'Malayalam (മലയാളം)' },
-    { code: 'te-IN', name: 'Telugu (తెలుగు)' },
-    { code: 'kn-IN', name: 'Kannada (ಕನ್ನಡ)' },
-    { code: 'es-ES', name: 'Spanish' },
-    { code: 'fr-FR', name: 'French' },
-  ];
 
   const askQuestion = async (q: Question, isFirst: boolean = false) => {
     setIsTyping(true);
