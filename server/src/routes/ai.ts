@@ -275,6 +275,7 @@ router.post('/rephrase', async (req: Request, res: Response) => {
     const prompt = `Rewrite this form question naturally using a ${tone} tone.
 ${isFirst ? 'This is the FIRST question in the conversation, so include a very brief, natural greeting.' : ''}
 ${req.body.sentiment ? `IMPORTANT: The user seems ${req.body.sentiment}. Adjust your response to be empathetic to this mood.` : ''}
+${req.body.language && req.body.language !== 'en' ? `IMPORTANT: The user is speaking ${req.body.language}. Translate the entire question and greeting into that language accurately.` : ''}
 
 Original question: "${question}"
 
@@ -412,6 +413,28 @@ router.post('/detect-sentiment', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Sentiment detection error:', error);
     res.json({ sentiment: 'neutral' });
+  }
+});
+
+// Detect language of a response
+router.post('/detect-language', async (req: Request, res: Response) => {
+  try {
+    const { answer } = req.body;
+    if (!answer || answer.length < 3) return res.json({ languageCode: 'en' });
+
+    const prompt = `Detect the language of this text: "${answer}"
+    
+    Return ONLY its ISO 639-1 two-letter language code (e.g., "en", "es", "fr", "hi").
+    
+    Return ONLY the code. No punctuation.`;
+
+    const result = await callAI(prompt);
+    const code = result.toLowerCase().trim().replace(/[^a-z]/g, '');
+    
+    res.json({ languageCode: code.length === 2 ? code : 'en' });
+  } catch (error) {
+    console.error('Language detection error:', error);
+    res.json({ languageCode: 'en' });
   }
 });
 

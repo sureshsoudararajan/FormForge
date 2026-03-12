@@ -39,6 +39,46 @@ interface ConversationalFormPageProps {
   onBack?: () => void;
 }
 
+const getSentimentStyles = (sentiment: string | null) => {
+  switch (sentiment) {
+    case 'happy':
+      return {
+        bg: 'bg-emerald-950/20',
+        glow: 'shadow-[0_0_100px_rgba(16,185,129,0.15)]',
+        border: 'border-emerald-500/30',
+        dot: 'bg-emerald-500'
+      };
+    case 'frustrated':
+      return {
+        bg: 'bg-rose-950/20',
+        glow: 'shadow-[0_0_100px_rgba(244,63,94,0.15)]',
+        border: 'border-rose-500/30',
+        dot: 'bg-rose-500'
+      };
+    case 'hurried':
+      return {
+        bg: 'bg-amber-950/20',
+        glow: 'shadow-[0_0_100px_rgba(245,158,11,0.15)]',
+        border: 'border-amber-500/30',
+        dot: 'bg-amber-500'
+      };
+    case 'detailed':
+      return {
+        bg: 'bg-indigo-950/20',
+        glow: 'shadow-[0_0_100px_rgba(99,102,241,0.15)]',
+        border: 'border-indigo-500/30',
+        dot: 'bg-indigo-500'
+      };
+    default:
+      return {
+        bg: 'bg-gray-950',
+        glow: '',
+        border: 'border-gray-800',
+        dot: 'bg-blue-500'
+      };
+  }
+};
+
 export default function ConversationalFormPage({ shareToken: propToken, initialData, onBack }: ConversationalFormPageProps = {}) {
   const { shareToken: paramsToken } = useParams();
   const shareToken = propToken || paramsToken;
@@ -54,6 +94,7 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
   const [tone, setTone] = useState('friendly');
   const [isUploading, setIsUploading] = useState(false);
   const [currentSentiment, setCurrentSentiment] = useState<string | null>(null);
+  const [currentLanguage, setCurrentLanguage] = useState<string>('en');
   const [preFillBuffer, setPreFillBuffer] = useState<Record<string, any>>({});
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
@@ -153,7 +194,8 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
         question: questionText, 
         tone, 
         isFirst,
-        sentiment: currentSentiment
+        sentiment: currentSentiment,
+        language: currentLanguage
       });
       const data = res.data;
       
@@ -194,6 +236,18 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
         answer: userAns 
       });
       const parseData = parseRes.data;
+
+      // 2.3 Detect language (only on first response usually, but let's do it if not set)
+      if (currentLanguage === 'en') {
+        try {
+          const langRes = await api.post('/ai/detect-language', { answer: userAns });
+          if (langRes.data.languageCode !== 'en') {
+            setCurrentLanguage(langRes.data.languageCode);
+          }
+        } catch (err) {
+          console.error('Language detection failed:', err);
+        }
+      }
 
       // 2.5 Detect sentiment
       try {
@@ -373,13 +427,19 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
     );
   }
 
+  const styles = getSentimentStyles(currentSentiment);
+
   return (
-    <div className={`flex flex-col h-screen font-sans ${isEmbed ? 'bg-transparent' : 'bg-gray-950 text-gray-100'}`}>
+    <div className={`flex flex-col h-screen font-sans transition-all duration-1000 ${isEmbed ? 'bg-transparent' : `${styles.bg} text-gray-100`}`}>
+      {/* Dynamic Background Glow */}
+      {!isEmbed && (
+        <div className={`fixed inset-0 pointer-events-none transition-all duration-1000 z-[-1] opacity-50 ${styles.glow}`} />
+      )}
       {/* Header - Hidden in Embed Mode */}
       {!isEmbed && (
-        <header className="px-6 py-4 flex items-center justify-between border-b border-gray-800 bg-gray-950/80 backdrop-blur-md sticky top-0 z-10">
+        <header className={`px-6 py-4 flex items-center justify-between border-b ${styles.border} bg-gray-950/40 backdrop-blur-md sticky top-0 z-10 transition-colors duration-1000`}>
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse" />
+            <div className={`w-3 h-3 rounded-full transition-colors duration-1000 ${styles.dot} animate-pulse`} />
             <h1 className="font-semibold text-gray-200">FormMorph</h1>
           </div>
         </header>
