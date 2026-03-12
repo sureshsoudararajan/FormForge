@@ -212,8 +212,7 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
         question: questionText, 
         tone, 
         isFirst,
-        sentiment: currentSentiment,
-        language: currentLanguage
+        sentiment: currentSentiment
       });
       const data = res.data;
       
@@ -255,63 +254,6 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
       });
       const parseData = parseRes.data;
 
-      // 2.3 Detect language (only on first response usually, but let's do it if not set)
-      if (currentLanguage === 'en') {
-        try {
-          const langRes = await api.post('/ai/detect-language', { answer: userAns });
-          if (langRes.data.languageCode !== 'en') {
-            setCurrentLanguage(langRes.data.languageCode);
-          }
-        } catch (err) {
-          console.error('Language detection failed:', err);
-        }
-      }
-
-      // 2.5 Detect sentiment
-      try {
-        const sentimentRes = await api.post('/ai/detect-sentiment', { answer: userAns });
-        setCurrentSentiment(sentimentRes.data.sentiment);
-      } catch (err) {
-        console.error('Sentiment detection failed:', err);
-      }
-
-      // 3. Submit answer to session, get next question
-      const submitRes = await api.post(`/session/${sessionId}/answer`, { 
-        questionId: currentQuestion.id, 
-        rawAnswer: userAns,
-        parsedAnswer: parseData.parsed
-      });
-      const submitData = submitRes.data;
-
-      if (submitData.done) {
-        // Complete session
-        await api.post(`/session/${sessionId}/complete`);
-        setIsCompleted(true);
-        setIsTyping(false);
-      } else {
-        // Check if NEXT question is in pre-fill buffer
-        const nextQ = submitData.nextQuestion;
-        if (preFillBuffer[nextQ.id]) {
-          // Auto-submit from buffer
-          setMessages(prev => [...prev, { 
-            id: Date.now().toString(), 
-            type: 'ai', 
-            content: `I've found the answer for "${nextQ.text || nextQ.label}" in your document: "${preFillBuffer[nextQ.id]}"` 
-          }]);
-          
-          const autoSubmitRes = await api.post(`/session/${sessionId}/answer`, { 
-            questionId: nextQ.id, 
-            rawAnswer: preFillBuffer[nextQ.id].toString(),
-            parsedAnswer: preFillBuffer[nextQ.id]
-          });
-          
-          if (autoSubmitRes.data.done) {
-            await api.post(`/session/${sessionId}/complete`);
-            setIsCompleted(true);
-            setIsTyping(false);
-          } else {
-            await askQuestion(autoSubmitRes.data.nextQuestion);
-          }
         } else {
           await askQuestion(nextQ);
         }

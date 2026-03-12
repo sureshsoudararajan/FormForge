@@ -275,7 +275,6 @@ router.post('/rephrase', async (req: Request, res: Response) => {
     const prompt = `Rewrite this form question naturally using a ${tone} tone.
 ${isFirst ? 'This is the FIRST question in the conversation, so include a very brief, natural greeting.' : ''}
 ${req.body.sentiment ? `IMPORTANT: The user seems ${req.body.sentiment}. Adjust your response to be empathetic to this mood.` : ''}
-${req.body.language && req.body.language !== 'en' ? `IMPORTANT: The user is speaking ${req.body.language}. Translate the entire question and greeting into that language accurately.` : ''}
 
 Original question: "${question}"
 
