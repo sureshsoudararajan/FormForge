@@ -1,0 +1,8 @@
+[dotenv@17.3.1] injecting env (4) from .env -- tip: ⚙️  override existing env vars with { override: true }
+Testing with new API Key...
+[FAIL] gemini-1.5-flash: Status 404 - [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/mod
+[FAIL] gemini-1.5-flash-latest: Status 404 - [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/mod
+[FAIL] gemini-1.5-pro: Status 404 - [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/mod
+[FAIL] gemini-2.0-flash-exp: Status 404 - [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/mod
+[FAIL] gemini-exp-1206: Status 404 - [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/mod
+[FAIL] learnlm-1.5-pro-experimental: Status 404 - [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/mod

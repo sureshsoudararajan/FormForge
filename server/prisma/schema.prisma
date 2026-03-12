@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  forms     Form[]
+  createdAt DateTime @default(now())
+}
+
+model Form {
+  id            String     @id @default(uuid())
+  title         String
+  description   String     @default("")
+  legacySchema  String     @default("[]") // JSON string of FormField[]
+  tone          String     @default("friendly")
+  questions     String     @default("[]") // JSON string of { id, text, type, hint }[]
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  responses     Response[]
+  sessions      Session[]
+  published     Boolean    @default(false)
+  shareToken    String     @unique @default(uuid())
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Response {
+  id        String   @id @default(uuid())
+  formId    String
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  data      String   // JSON string of { fieldId: value }
+  createdAt DateTime @default(now())
+}
+
+model Session {
+  id          String    @id @default(uuid())
+  formId      String
+  form        Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
+  answers     String    @default("[]") // JSON string of { questionId, raw, parsed, sentiment }[]
+  completed   Boolean   @default(false)
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+}

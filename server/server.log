@@ -1,0 +1,5 @@
+
+> formforge-server@1.0.0 dev
+> tsx watch src/index.ts
+
+sh: line 1: tsx: command not found
