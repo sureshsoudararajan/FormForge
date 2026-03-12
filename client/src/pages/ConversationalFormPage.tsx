@@ -179,6 +179,23 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
+      
+      // Auto-translate to English if needed
+      const handleTranslation = async () => {
+        if (!inputValue.trim()) return;
+        setIsTranslating(true);
+        try {
+          const res = await api.post('/ai/translate-to-english', { text: inputValue });
+          setInputValue(res.data.translated);
+        } catch (err) {
+          console.error('Translation failed:', err);
+        } finally {
+          setIsTranslating(false);
+        }
+      };
+      
+      // Delay slightly to ensure browser finishes transcription
+      setTimeout(handleTranslation, 500);
     } else {
       setInputValue('');
       if (recognitionRef.current) {
@@ -254,6 +271,51 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
       });
       const parseData = parseRes.data;
 
+      // 2.5 Detect sentiment
+      try {
+        const sentimentRes = await api.post('/ai/detect-sentiment', { answer: userAns });
+        setCurrentSentiment(sentimentRes.data.sentiment);
+      } catch (err) {
+        console.error('Sentiment detection failed:', err);
+      }
+
+      // 3. Submit answer to session, get next question
+      const submitRes = await api.post(`/session/${sessionId}/answer`, { 
+        questionId: currentQuestion.id, 
+        rawAnswer: userAns,
+        parsedAnswer: parseData.parsed
+      });
+      const submitData = submitRes.data;
+
+      if (submitData.done) {
+        // Complete session
+        await api.post(`/session/${sessionId}/complete`);
+        setIsCompleted(true);
+        setIsTyping(false);
+      } else {
+        // Check if NEXT question is in pre-fill buffer
+        const nextQ = submitData.nextQuestion;
+        if (preFillBuffer[nextQ.id]) {
+          // Auto-submit from buffer
+          setMessages(prev => [...prev, { 
+            id: Date.now().toString(), 
+            type: 'ai', 
+            content: `I've found the answer for "${nextQ.text || nextQ.label}" in your document: "${preFillBuffer[nextQ.id]}"` 
+          }]);
+          
+          const autoSubmitRes = await api.post(`/session/${sessionId}/answer`, { 
+            questionId: nextQ.id, 
+            rawAnswer: preFillBuffer[nextQ.id].toString(),
+            parsedAnswer: preFillBuffer[nextQ.id]
+          });
+          
+          if (autoSubmitRes.data.done) {
+            await api.post(`/session/${sessionId}/complete`);
+            setIsCompleted(true);
+            setIsTyping(false);
+          } else {
+            await askQuestion(autoSubmitRes.data.nextQuestion);
+          }
         } else {
           await askQuestion(nextQ);
         }
