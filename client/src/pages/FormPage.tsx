@@ -32,6 +32,7 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
   const [error, setError] = useState('');
   const [values, setValues] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (initialData) return;
@@ -60,6 +61,29 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
   const setValue = (fieldId: string, value: any) => {
     setValues((prev) => ({ ...prev, [fieldId]: value }));
     setErrors((prev) => ({ ...prev, [fieldId]: '' }));
+  };
+
+  const handleFileChange = async (fieldId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFiles(prev => ({ ...prev, [fieldId]: true }));
+    setErrors(prev => ({ ...prev, [fieldId]: '' }));
+    
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await api.post('/responses/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setValue(fieldId, res.data.filePath);
+    } catch (err) {
+      console.error('File upload failed:', err);
+      setErrors(prev => ({ ...prev, [fieldId]: 'File upload failed. Please try again.' }));
+    } finally {
+      setUploadingFiles(prev => ({ ...prev, [fieldId]: false }));
+    }
   };
 
   const validate = (): boolean => {
@@ -340,15 +364,24 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
               )}
 
               {field.type === 'file' && (
-                <div className="flex items-center gap-4">
-                  <Input
-                    type="file"
-                    className="bg-slate-950/50 border-white/5 h-14 rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-400 file:bg-blue-600 file:text-white file:border-none file:rounded-lg file:px-4 file:py-1 file:mr-4 file:hover:bg-blue-500 transition-colors cursor-pointer"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) setValue(field.id, file.name);
-                    }}
-                  />
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      className="bg-slate-950/50 border-white/5 h-14 rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-400 file:bg-blue-600 file:text-white file:border-none file:rounded-lg file:px-4 file:py-1 file:mr-4 file:hover:bg-blue-500 transition-colors cursor-pointer"
+                      onChange={(e) => handleFileChange(field.id, e)}
+                      disabled={uploadingFiles[field.id]}
+                    />
+                    {uploadingFiles[field.id] && (
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                    )}
+                  </div>
+                  {values[field.id] && !uploadingFiles[field.id] && (
+                    <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/5 px-3 py-2 rounded-lg border border-emerald-500/20">
+                      <CheckCircle2 className="w-3 h-3" />
+                      File ready: {values[field.id].split('/').pop()}
+                    </div>
+                  )}
                 </div>
               )}
 
