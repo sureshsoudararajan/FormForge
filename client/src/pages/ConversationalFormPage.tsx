@@ -468,19 +468,31 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
 
   return (
     <div className={`flex flex-col h-screen font-sans transition-all duration-1000 ${isEmbed ? 'bg-transparent' : `${styles.bg} text-gray-100`}`}>
-      {/* Dynamic Background Glow */}
+      {/* Advanced Mesh Gradient Background */}
       {!isEmbed && (
-        <div className={`fixed inset-0 pointer-events-none transition-all duration-1000 z-[-1] opacity-50 ${styles.glow}`} />
+        <div className="fixed inset-0 z-[-1] overflow-hidden">
+          <div className={`absolute inset-0 transition-colors duration-1000 ${styles.bg}`} />
+          <div className={`absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 animate-pulse bg-gradient-to-br ${styles.accent}`} />
+          <div className={`absolute top-[20%] -right-[10%] w-[35%] h-[35%] rounded-full blur-[120px] opacity-10 bg-blue-500`} />
+          <div className={`absolute -bottom-[10%] left-[20%] w-[45%] h-[45%] rounded-full blur-[120px] opacity-15 bg-indigo-500`} />
+        </div>
       )}
-      {/* Header - Hidden in Embed Mode */}
+
+      {/* Header - Premium Glassmorphism */}
       {!isEmbed && (
-        <header className={`px-8 py-5 flex items-center justify-between border-b ${styles.border} bg-slate-950/40 backdrop-blur-xl sticky top-0 z-10 transition-colors duration-1000`}>
+        <header className={`px-8 py-5 flex items-center justify-between border-b ${styles.border} bg-slate-950/20 backdrop-blur-2xl sticky top-0 z-50 transition-colors duration-1000`}>
           <div className="flex items-center gap-4">
-            <div className={`w-2.5 h-2.5 rounded-full transition-colors duration-1000 ${styles.dot} shadow-[0_0_10px_rgba(59,130,246,0.5)]`} />
-            <span className="text-sm font-bold tracking-[0.2em] text-slate-400 uppercase">FormForge Premium</span>
+            <div className={`relative w-3 h-3`}>
+              <div className={`absolute inset-0 rounded-full ${styles.dot} blur-sm animate-pulse`} />
+              <div className={`absolute inset-0 rounded-full ${styles.dot}`} />
+            </div>
+            <span className="text-sm font-black tracking-[0.3em] text-white/90 uppercase">FormForge <span className="text-blue-500">Pro</span></span>
           </div>
-          <div className="hidden sm:block text-[10px] text-slate-500 font-medium uppercase tracking-widest">
-            AI-Enhanced Experience
+          <div className="hidden sm:flex items-center gap-6">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Status</span>
+              <span className="text-[10px] text-emerald-400 font-medium">AI Core Active</span>
+            </div>
           </div>
         </header>
       )}
@@ -497,13 +509,18 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                 className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div 
-                  className={`max-w-[85%] sm:max-w-[75%] px-6 py-4 rounded-[2rem] ${
+                  className={`max-w-[85%] sm:max-w-[70%] px-7 py-5 rounded-[2.5rem] shadow-2xl transition-all duration-500 overflow-hidden relative group ${
                     msg.type === 'user' 
-                      ? `bg-gradient-to-br ${styles.accent} text-white rounded-br-none shadow-lg shadow-blue-500/10` 
-                      : 'bg-slate-800/40 text-slate-100 rounded-bl-none border border-slate-700/50 backdrop-blur-md shadow-sm'
+                      ? `bg-gradient-to-br ${styles.accent} text-white rounded-br-none ring-1 ring-white/20` 
+                      : 'bg-slate-800/20 text-slate-100 rounded-bl-none border border-white/5 backdrop-blur-3xl'
                   }`}
                 >
-                  <p className="text-[15px] leading-relaxed tracking-wide whitespace-pre-wrap">{msg.content}</p>
+                  {msg.type === 'ai' && (
+                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-transparent opacity-50" />
+                  )}
+                  <p className="text-[15.5px] leading-relaxed tracking-wide font-medium relative z-10">
+                    {msg.content}
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -595,11 +612,11 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                     </div>
                   </motion.div>
                 )}
-                <div className={`bg-slate-900/80 backdrop-blur-xl rounded-[2rem] border ${isListening ? 'border-rose-500 ring-4 ring-rose-500/10' : `${styles.border} focus-within:border-blue-500/50`} transition-all flex-1 p-3 flex items-center shadow-2xl`}>
+                <div className={`bg-slate-950/30 backdrop-blur-[40px] rounded-[3rem] border ${isListening ? 'border-rose-500 ring-8 ring-rose-500/5' : `${styles.border} focus-within:border-blue-500/40`} transition-all duration-500 flex-1 p-3.5 flex items-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] ring-1 ring-white/5`}>
                   <button 
                     type="button" 
                     onClick={() => setShowLangMenu(!showLangMenu)}
-                    className={`p-3 rounded-full transition-all ${isListening ? 'bg-rose-500 text-white animate-pulse' : 'text-slate-400 hover:text-white hover:bg-slate-800'} ${showLangMenu ? 'text-blue-400 bg-slate-800' : ''}`}
+                    className={`p-3.5 rounded-full transition-all duration-300 ${isListening ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'} ${showLangMenu ? 'text-blue-400 bg-white/5 shadow-inner' : ''}`}
                     title={isListening ? 'Stop recording' : 'Select language and record'}
                   >
                     {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
@@ -615,8 +632,8 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                         handleSend();
                       }
                     }}
-                    placeholder={isListening ? "I'm listening..." : isTranslating ? "Translating naturally..." : "Type your answer..."}
-                    className="w-full bg-transparent border-none text-slate-100 placeholder:text-slate-500 px-4 py-3 focus:outline-none resize-none min-h-[50px] max-h-32 text-[15px] leading-relaxed"
+                    placeholder={isListening ? "AI is processing your voice..." : isTranslating ? "Polishing naturally..." : "Type or speak naturally..."}
+                    className="w-full bg-transparent border-none text-slate-100 placeholder:text-slate-500/70 px-5 py-3.5 focus:outline-none resize-none min-h-[56px] max-h-48 text-[16px] leading-[1.6] scrollbar-hide"
                     rows={1}
                     autoFocus
                   />
@@ -627,14 +644,14 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                       handleSend();
                     }}
                     disabled={!inputValue.trim()}
-                    className="ml-2"
+                    className="ml-3 group/send"
                   >
-                    <div className={`p-3 rounded-full transition-all duration-300 ${
+                    <div className={`p-4 rounded-full transition-all duration-500 transform ${
                       inputValue.trim() 
-                        ? 'bg-slate-100 text-slate-900 hover:scale-110 shadow-lg' 
-                        : 'bg-slate-800 text-slate-500 grayscale opacity-50'
+                        ? 'bg-white text-slate-950 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+                        : 'bg-slate-800/50 text-slate-600 grayscale opacity-30 cursor-not-allowed'
                     }`}>
-                      <Send className="w-5 h-5" />
+                      <Send className="w-5 h-5 transition-transform group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" />
                     </div>
                   </button>
                 </div>
