@@ -445,7 +445,12 @@ router.post('/translate-to-english', async (req: Request, res: Response) => {
 
     const prompt = `Translate this text to natural English: "${text}"
     
-    Return ONLY the translated English text. No quotes, no markdown, no explanation.`;
+    CRITICAL RULES:
+    1. Return ONLY the translated English text. 
+    2. Do NOT provide definitions, explanations, or any extra information.
+    3. Do NOT provide an meaning or context unless it's necessary for the translation itself.
+    4. If the text is already in English, return it EXACTLY as it is.
+    5. No quotes, no markdown, no conversational fluff.`;
 
     const result = await callAI(prompt);
     const cleanResult = result.replace(/^["']|["']$/g, '').trim();

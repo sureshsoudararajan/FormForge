@@ -188,6 +188,13 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
       // Auto-translate to English if needed
       const handleTranslation = async () => {
         if (!inputValue.trim()) return;
+        
+        // Skip translation if already English (basic Latin check)
+        const isEnglish = /^[a-zA-Z0-9\s.,!?'"()-]+$/.test(inputValue.trim());
+        if (isEnglish && voiceLanguage.startsWith('en')) {
+          return; 
+        }
+
         setIsTranslating(true);
         try {
           const res = await api.post('/ai/translate-to-english', { text: inputValue });
@@ -271,11 +278,14 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
       let finalAns = userAns;
       
       // Auto-translate to English if not already English (AI will decide)
-      try {
-        const transRes = await api.post('/ai/translate-to-english', { text: userAns });
-        finalAns = transRes.data.translated;
-      } catch (err) {
-        console.error('Translation failed, storage will use raw input:', err);
+      const isEnglish = /^[a-zA-Z0-9\s.,!?'"()-]+$/.test(userAns);
+      if (!isEnglish) {
+        try {
+          const transRes = await api.post('/ai/translate-to-english', { text: userAns });
+          finalAns = transRes.data.translated;
+        } catch (err) {
+          console.error('Translation failed, storage will use raw input:', err);
+        }
       }
 
       const questionText = currentQuestion.text || currentQuestion.label || '';
