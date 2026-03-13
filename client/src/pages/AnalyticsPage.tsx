@@ -91,46 +91,36 @@ export default function AnalyticsPage() {
   const premiumColors = ['#3b82f6', '#8b5cf6', '#d946ef', '#06b6d4', '#10b981', '#f59e0b'];
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
-      {/* Liquid Mesh Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[#0f172a]" />
-        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[150px] opacity-10 bg-blue-600 animate-pulse" />
-        <div className="absolute bottom-[10%] left-[20%] w-[40%] h-[40%] rounded-full blur-[150px] opacity-10 bg-indigo-600" />
-      </div>
-
-      <header className="border-b border-white/5 bg-slate-950/20 backdrop-blur-2xl sticky top-0 z-50 transition-colors duration-1000">
-        <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-6">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
+      <header className="border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate('/dashboard')}
-              className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group"
+              className="p-2 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-white/5 transition-all group"
             >
-              <ArrowLeft className="h-5 w-5 text-slate-400 group-hover:text-white group-hover:-translate-x-1 transition-all" />
+              <ArrowLeft className="h-4 w-4 text-slate-400 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
             </button>
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-blue-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Analytics Engine</span>
-              </div>
-              <h1 className="text-xl font-black text-white tracking-tight uppercase">{form.title}</h1>
+              <h1 className="text-lg font-bold text-white tracking-tight">{form.title}</h1>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Analytics Intelligence</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link to={`/responses/${id}`}>
-              <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5 font-bold uppercase tracking-widest text-[10px] px-6">Responses</Button>
+              <Button variant="ghost" className="text-slate-400 hover:text-white font-bold uppercase tracking-widest text-[10px]">Responses</Button>
             </Link>
             <Button
               onClick={handleAiInsights}
               disabled={aiLoading || analytics.totalResponses === 0}
-              className="bg-white text-slate-950 hover:bg-slate-100 font-black uppercase tracking-widest text-[10px] px-6 py-6 rounded-2xl shadow-2xl transition-all active:scale-95"
+              className="bg-blue-600 text-white hover:bg-blue-500 font-bold uppercase tracking-widest text-[10px] px-5 h-10 rounded-xl transition-all shadow-lg active:scale-95"
             >
               {aiLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="h-3 w-3 animate-spin mr-2" />
               ) : (
-                <Sparkles className="h-4 w-4 text-blue-600 mr-2" />
+                <Sparkles className="h-3 w-3 mr-2" />
               )}
-              {aiLoading ? 'Processing...' : 'Deep AI Insights'}
+              {aiLoading ? 'Processing' : 'AI Analysis'}
             </Button>
           </div>
         </div>
@@ -140,14 +130,14 @@ export default function AnalyticsPage() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         
         {showInsights && aiInsights && (
-          <div className="mb-8 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="mb-10 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
             {/* AI Summary Banner */}
-            <div className="bg-primary/10 border border-primary/20 rounded-xl p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-              <h3 className="text-lg font-semibold flex items-center gap-2 mb-3 text-primary">
-                <Sparkles className="h-5 w-5" /> Executive Summary
+            <div className="bg-blue-600 border border-blue-500 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+               <h3 className="text-sm font-bold flex items-center gap-2 mb-4 text-white/90 uppercase tracking-widest">
+                <Sparkles className="h-4 w-4" /> Intelligence Summary
               </h3>
-              <p className="text-sm md:text-base leading-relaxed text-card-foreground/90 relative z-10">
+              <p className="text-base md:text-lg font-medium leading-relaxed text-white relative z-10">
                 {(aiInsights as any).summary || aiInsights}
               </p>
             </div>
@@ -155,41 +145,29 @@ export default function AnalyticsPage() {
             <div className="grid md:grid-cols-2 gap-6">
               {/* Sentiment Analysis */}
               {(aiInsights as any).sentiment && (
-                <Card className="border-primary/10 bg-card/50">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4 text-purple-500" /> Sentiment Analysis
+                <Card className="border-white/5 bg-slate-900 shadow-xl rounded-3xl">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-slate-400">
+                      <BarChart3 className="h-4 w-4 text-blue-500" /> Sentiment Profile
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-emerald-500 font-medium">Positive</span>
-                          <span>{(aiInsights as any).sentiment.positive}%</span>
+                    <div className="space-y-5">
+                      {[
+                        { label: 'Positive', value: (aiInsights as any).sentiment.positive, color: 'bg-emerald-500' },
+                        { label: 'Neutral', value: (aiInsights as any).sentiment.neutral, color: 'bg-blue-400' },
+                        { label: 'Negative', value: (aiInsights as any).sentiment.negative, color: 'bg-rose-500' },
+                      ].map((s, i) => (
+                        <div key={i}>
+                          <div className="flex justify-between text-[11px] font-bold mb-1.5">
+                            <span className="text-slate-400">{s.label}</span>
+                            <span>{s.value}%</span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                            <div className={`h-full ${s.color} rounded-full transition-all duration-1000`} style={{ width: `${s.value}%` }} />
+                          </div>
                         </div>
-                        <div className="h-2 rounded-full border bg-muted overflow-hidden">
-                          <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(aiInsights as any).sentiment.positive}%` }} />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-blue-400 font-medium">Neutral</span>
-                          <span>{(aiInsights as any).sentiment.neutral}%</span>
-                        </div>
-                        <div className="h-2 rounded-full border bg-muted overflow-hidden">
-                          <div className="h-full bg-blue-400 rounded-full" style={{ width: `${(aiInsights as any).sentiment.neutral}%` }} />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-rose-500 font-medium">Negative</span>
-                          <span>{(aiInsights as any).sentiment.negative}%</span>
-                        </div>
-                        <div className="h-2 rounded-full border bg-muted overflow-hidden">
-                          <div className="h-full bg-rose-500 rounded-full" style={{ width: `${(aiInsights as any).sentiment.negative}%` }} />
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -197,17 +175,17 @@ export default function AnalyticsPage() {
 
               {/* Anomalies */}
               {(aiInsights as any).anomalies && (aiInsights as any).anomalies.length > 0 && (
-                <Card className="border-rose-500/20 bg-rose-500/5">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2 text-rose-500">
-                      <AlertTriangle className="h-4 w-4" /> Flagged Responses
+                <Card className="border-rose-500/10 bg-rose-500/5 shadow-xl rounded-3xl">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-rose-500/80">
+                      <AlertTriangle className="h-4 w-4" /> Anomalous Patterns
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-2">
+                    <ul className="space-y-3">
                       {(aiInsights as any).anomalies.map((anom: string, i: number) => (
-                        <li key={i} className="text-sm text-card-foreground/80 flex items-start gap-2">
-                          <span className="text-rose-500 mt-0.5">•</span>
+                        <li key={i} className="text-xs font-medium text-rose-200/70 flex items-start gap-3">
+                          <span className="h-1 w-1 rounded-full bg-rose-500 mt-1.5 shrink-0" />
                           {anom}
                         </li>
                       ))}
@@ -216,57 +194,29 @@ export default function AnalyticsPage() {
                 </Card>
               )}
             </div>
-
-            {/* Clusters */}
-            {(aiInsights as any).clusters && (
-              <Card className="border-primary/10 bg-card/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Network className="h-4 w-4 text-blue-500" /> Response Clusters
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {(aiInsights as any).clusters.map((cluster: any, i: number) => (
-                      <div key={i} className="p-4 rounded-xl border bg-background/50 flex flex-col">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium text-sm text-primary">{cluster.name}</h4>
-                          <span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                            {cluster.count}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-auto">{cluster.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            <div className="h-px bg-border my-8" />
           </div>
         )}
         {/* Stats Cards & Radar Map */}
-        <div className="grid md:grid-cols-12 gap-6 mb-12">
+        <div className="grid md:grid-cols-12 gap-6 mb-8">
           {/* Main Metrics */}
           <div className="md:col-span-8 grid grid-cols-2 gap-6">
             {[
-              { label: 'Total Responses', value: analytics.totalResponses, icon: BarChart3, color: 'text-blue-500' },
-              { label: 'Completion Rate', value: '94%', icon: Activity, color: 'text-emerald-500' },
-              { label: 'Deployment Health', value: 'Prime', icon: TrendingUp, color: 'text-purple-500' },
-              { label: 'Data Pulse', value: 'Steady', icon: Sparkles, color: 'text-amber-500' },
+              { label: 'Total Responses', value: analytics.totalResponses, icon: BarChart3 },
+              { label: 'Completion Rate', value: '94%', icon: Activity },
+              { label: 'Deployment Health', value: 'Prime', icon: TrendingUp },
+              { label: 'Data Pulse', value: 'Steady', icon: Sparkles },
             ].map((stat, i) => (
-              <Card key={i} className="bg-slate-900/40 backdrop-blur-3xl border-white/5 hover:border-white/10 transition-all rounded-[2rem] shadow-2xl group overflow-hidden border-none active:scale-[0.98]">
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                  <stat.icon className="h-24 w-24" />
+              <Card key={i} className="bg-slate-900 border border-white/5 rounded-3xl group overflow-hidden transition-all hover:bg-slate-800/50">
+                <div className="absolute top-0 right-0 p-4 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
+                  <stat.icon className="h-20 w-20 text-blue-500" />
                 </div>
-                <CardContent className="p-8 relative z-10">
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-2">{stat.label}</p>
-                  <div className="flex items-baseline gap-3">
-                    <p className="text-4xl font-black text-white tracking-tighter">{stat.value}</p>
-                    <div className="flex items-center gap-1 text-emerald-500 text-[10px] font-bold">
-                      <TrendingUp className="h-3 w-3" />
-                      <span>+12%</span>
+                <CardContent className="p-6 relative z-10">
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">{stat.label}</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-bold text-white tracking-tight">{stat.value}</p>
+                    <div className="flex items-center gap-1 text-emerald-500 text-[9px] font-bold">
+                      <TrendingUp className="h-2.5 w-2.5" />
+                      <span>12%</span>
                     </div>
                   </div>
                 </CardContent>
@@ -275,18 +225,18 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Form Fingerprint Radar */}
-          <Card className="md:col-span-4 bg-slate-900/40 backdrop-blur-3xl border-white/5 rounded-[2.5rem] shadow-2xl border-none overflow-hidden flex flex-col items-center justify-center pt-8">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-4">Response DNA Profile</p>
-            <ResponsiveContainer width="100%" height={240}>
-              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                <PolarGrid stroke="rgba(255,255,255,0.05)" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }} />
+          <Card className="md:col-span-4 bg-slate-900 border border-white/5 rounded-3xl overflow-hidden flex flex-col items-center justify-center p-6">
+            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-6">Response DNA Profile</p>
+            <ResponsiveContainer width="100%" height={200}>
+              <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
+                <PolarGrid stroke="rgba(255,255,255,0.03)" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 8, fontWeight: 700 }} />
                 <Radar
                   name="Responses"
                   dataKey="A"
                   stroke="#3b82f6"
                   fill="#3b82f6"
-                  fillOpacity={0.4}
+                  fillOpacity={0.3}
                 />
               </RadarChart>
             </ResponsiveContainer>
@@ -295,132 +245,73 @@ export default function AnalyticsPage() {
 
         {/* Submissions Over Time Chart */}
         {analytics.submissionsOverTime.length > 0 && (
-          <Card className="mb-12 bg-slate-900/40 backdrop-blur-2xl border-none border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/5">
-            <CardHeader className="px-10 py-8 pb-2">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-blue-500/10 rounded-xl">
-                  <TrendingUp className="h-5 w-5 text-blue-500" />
-                </div>
-                <CardTitle className="text-sm font-black uppercase tracking-[0.4em] text-slate-400">Response Volatility Trend</CardTitle>
+          <Card className="mb-8 bg-slate-900 border border-white/5 rounded-3xl overflow-hidden">
+            <CardHeader className="px-8 py-6 pb-2">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-blue-500" />
+                <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Submission Velocity</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="px-10 py-8 pt-6">
-              <ResponsiveContainer width="100%" height={260}>
+            <CardContent className="px-8 py-6 pt-0">
+              <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={analytics.submissionsOverTime}>
                   <defs>
                     <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.02)" vertical={false} />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="#334155" 
-                    fontSize={9} 
-                    axisLine={false} 
-                    tickLine={false}
-                    tick={{ fill: '#475569', fontWeight: 800 }}
-                  />
-                  <YAxis 
-                    stroke="#334155" 
-                    fontSize={9} 
-                    axisLine={false} 
-                    tickLine={false}
-                    tick={{ fill: '#475569', fontWeight: 800 }}
-                  />
+                  <XAxis dataKey="date" stroke="#334155" fontSize={9} axisLine={false} tickLine={false} tick={{ fill: '#475569' }} />
+                  <YAxis stroke="#334155" fontSize={9} axisLine={false} tickLine={false} tick={{ fill: '#475569' }} />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#020617',
-                      border: '1px solid rgba(255,255,255,0.05)',
-                      borderRadius: '1.5rem',
-                      fontSize: '10px',
-                      fontWeight: 800,
-                      boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
-                    }}
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '10px' }}
                   />
-                  <Area
-                    type="step"
-                    dataKey="count"
-                    stroke="#3b82f6"
-                    strokeWidth={3}
-                    fill="url(#colorCount)"
-                    animationDuration={2500}
-                  />
+                  <Area type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={3} fill="url(#colorCount)" animationDuration={1500} />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         )}
 
-        {/* High-Density Distribution Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        {/* Field Distribution Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           {chartFieldIds.map((fieldId) => {
             const field = form.schema.find((f) => f.id === fieldId);
             const data = analytics.fieldDistributions[fieldId];
             if (!data || !field) return null;
-
             const isPieType = field.type === 'radio' || field.type === 'dropdown';
 
             return (
-              <Card key={fieldId} className="bg-slate-900/40 backdrop-blur-2xl border-none border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/5 transition-all hover:translate-y-[-4px]">
-                <CardHeader className="p-8 pb-2">
-                   <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl ${isPieType ? 'bg-purple-500/10' : 'bg-emerald-500/10'}`}>
-                        {isPieType ? <PieIcon className="h-4 w-4 text-purple-500" /> : <BarChart3 className="h-4 w-4 text-emerald-500" />}
+              <Card key={fieldId} className="bg-slate-900 shadow-xl border border-white/5 rounded-3xl overflow-hidden transition-all hover:bg-slate-800/50">
+                <CardHeader className="px-6 py-6 pb-2">
+                   <div className="flex items-center gap-2">
+                      <div className={`p-1.5 rounded-lg ${isPieType ? 'bg-purple-500/10 text-purple-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                        {isPieType ? <PieIcon className="h-3.5 w-3.5" /> : <BarChart3 className="h-3.5 w-3.5" />}
                       </div>
-                      <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 truncate pr-4">{field.label}</CardTitle>
+                      <CardTitle className="text-[9px] font-bold uppercase tracking-widest text-slate-500 truncate">{field.label}</CardTitle>
                     </div>
                 </CardHeader>
-                <CardContent className="p-8 pt-4">
-                  <ResponsiveContainer width="100%" height={180}>
+                <CardContent className="px-6 py-6 pt-2">
+                  <ResponsiveContainer width="100%" height={160}>
                     {isPieType ? (
                       <PieChart>
-                        <Pie
-                          data={data}
-                          innerRadius={50}
-                          outerRadius={75}
-                          paddingAngle={4}
-                          dataKey="count"
-                          nameKey="label"
-                          animationDuration={2000}
-                        >
+                        <Pie data={data} innerRadius={40} outerRadius={60} paddingAngle={2} dataKey="count" nameKey="label" animationDuration={1000}>
                           {data.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={premiumColors[index % premiumColors.length]} stroke="none" />
+                            <Cell key={`cell-${index}`} fill={premiumColors[index % premiumColors.length]} stroke="rgba(255,255,255,0.05)" />
                           ))}
                         </Pie>
-                        <Tooltip 
-                           contentStyle={{
-                             backgroundColor: '#020617',
-                             border: 'none',
-                             borderRadius: '1rem',
-                             fontSize: '9px',
-                             fontWeight: 800
-                           }}
-                        />
+                        <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '9px' }} />
                       </PieChart>
                     ) : (
                       <BarChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.01)" vertical={false} />
                         <XAxis dataKey="label" hide />
                         <YAxis hide />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: '#020617',
-                            border: 'none',
-                            borderRadius: '1rem',
-                            fontSize: '9px',
-                            fontWeight: 800
-                          }}
-                        />
-                        <Bar
-                          dataKey="count"
-                          fill="#3b82f6"
-                          radius={[6, 6, 6, 6]}
-                          barSize={12}
-                        >
+                        <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '9px' }} />
+                        <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 4, 4]} barSize={8}>
                           {data.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={premiumColors[index % premiumColors.length]} opacity={0.8} />
+                            <Cell key={`cell-${index}`} fill={premiumColors[index % premiumColors.length]} />
                           ))}
                         </Bar>
                       </BarChart>
