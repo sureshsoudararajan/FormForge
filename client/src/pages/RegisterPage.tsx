@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,6 +39,22 @@ export default function RegisterPage() {
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to register');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/google-login', { 
+        token: credentialResponse.credential 
+      });
+      login(res.data.user, res.data.token);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Google registration failed');
     } finally {
       setLoading(false);
     }
@@ -123,6 +140,27 @@ export default function RegisterPage() {
               >
                 {loading ? 'Processing...' : 'Deploy Account'}
               </Button>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-white/5"></span>
+                </div>
+                <div className="relative flex justify-center text-[10px] font-black uppercase tracking-[0.3em]">
+                  <span className="bg-[#1e293b]/50 px-4 text-slate-500 backdrop-blur-sm">Social Protocol</span>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError('Google Deployment Failed')}
+                  theme="filled_black"
+                  shape="pill"
+                  size="large"
+                  text="signup_with"
+                  width="100%"
+                />
+              </div>
             </form>
             <div className="mt-8 text-center">
               <p className="text-sm font-medium text-slate-500">
