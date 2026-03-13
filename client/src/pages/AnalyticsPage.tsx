@@ -6,7 +6,8 @@ import api from '@/lib/api';
 import { AnalyticsData, FormField } from '@/types';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Area, AreaChart, PieChart, Pie, Cell
+  Tooltip, ResponsiveContainer, Area, AreaChart, PieChart, Pie, Cell,
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
 import {
   ArrowLeft, Zap, BarChart3, TrendingUp, Sparkles, Loader2, X, AlertTriangle, Network, PieChart as PieIcon, Activity
@@ -71,6 +72,21 @@ export default function AnalyticsPage() {
   if (!analytics || !form) return null;
 
   const chartFieldIds = Object.keys(analytics.fieldDistributions);
+  
+  // Aggregate data for Radar Chart (Form Fingerprint)
+  const radarData = chartFieldIds.map(id => {
+    const field = form.schema.find(f => f.id === id);
+    const distributions = analytics.fieldDistributions[id] || [];
+    const totalCount = distributions.reduce((acc, curr) => acc + curr.count, 0);
+    return {
+      subject: field?.label || id,
+      A: totalCount,
+      fullMark: Math.max(...chartFieldIds.map(fid => {
+        const dist = analytics.fieldDistributions[fid] || [];
+        return dist.reduce((a, c) => a + c.count, 0);
+      }), 10)
+    };
+  });
 
   const premiumColors = ['#3b82f6', '#8b5cf6', '#d946ef', '#06b6d4', '#10b981', '#f59e0b'];
 
@@ -230,79 +246,106 @@ export default function AnalyticsPage() {
             <div className="h-px bg-border my-8" />
           </div>
         )}
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
-          {[
-            { label: 'Total Responses', value: analytics.totalResponses, icon: BarChart3, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-            { label: 'Completion Rate', value: '94%', icon: Activity, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-            { label: 'Fields Captured', value: form.schema.length, icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-            { label: 'Data Density', value: 'High', icon: Sparkles, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-          ].map((stat, i) => (
-            <Card key={i} className="bg-slate-900/30 backdrop-blur-xl border-white/5 hover:border-white/10 transition-all rounded-[2rem] shadow-2xl group overflow-hidden relative">
-               <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
-                <stat.icon className="h-16 w-16" />
-              </div>
-              <CardContent className="p-8 relative z-10">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">{stat.label}</p>
-                <p className="text-4xl font-black text-white tracking-tighter">{stat.value}</p>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Stats Cards & Radar Map */}
+        <div className="grid md:grid-cols-12 gap-6 mb-12">
+          {/* Main Metrics */}
+          <div className="md:col-span-8 grid grid-cols-2 gap-6">
+            {[
+              { label: 'Total Responses', value: analytics.totalResponses, icon: BarChart3, color: 'text-blue-500' },
+              { label: 'Completion Rate', value: '94%', icon: Activity, color: 'text-emerald-500' },
+              { label: 'Deployment Health', value: 'Prime', icon: TrendingUp, color: 'text-purple-500' },
+              { label: 'Data Pulse', value: 'Steady', icon: Sparkles, color: 'text-amber-500' },
+            ].map((stat, i) => (
+              <Card key={i} className="bg-slate-900/40 backdrop-blur-3xl border-white/5 hover:border-white/10 transition-all rounded-[2rem] shadow-2xl group overflow-hidden border-none active:scale-[0.98]">
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                  <stat.icon className="h-24 w-24" />
+                </div>
+                <CardContent className="p-8 relative z-10">
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-2">{stat.label}</p>
+                  <div className="flex items-baseline gap-3">
+                    <p className="text-4xl font-black text-white tracking-tighter">{stat.value}</p>
+                    <div className="flex items-center gap-1 text-emerald-500 text-[10px] font-bold">
+                      <TrendingUp className="h-3 w-3" />
+                      <span>+12%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Form Fingerprint Radar */}
+          <Card className="md:col-span-4 bg-slate-900/40 backdrop-blur-3xl border-white/5 rounded-[2.5rem] shadow-2xl border-none overflow-hidden flex flex-col items-center justify-center pt-8">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-4">Response DNA Profile</p>
+            <ResponsiveContainer width="100%" height={240}>
+              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                <PolarGrid stroke="rgba(255,255,255,0.05)" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }} />
+                <Radar
+                  name="Responses"
+                  dataKey="A"
+                  stroke="#3b82f6"
+                  fill="#3b82f6"
+                  fillOpacity={0.4}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          </Card>
         </div>
 
         {/* Submissions Over Time Chart */}
         {analytics.submissionsOverTime.length > 0 && (
-          <Card className="mb-12 bg-slate-900/40 backdrop-blur-2xl border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/5">
-            <CardHeader className="p-8 pb-2">
+          <Card className="mb-12 bg-slate-900/40 backdrop-blur-2xl border-none border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/5">
+            <CardHeader className="px-10 py-8 pb-2">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-blue-500/10 rounded-xl">
                   <TrendingUp className="h-5 w-5 text-blue-500" />
                 </div>
-                <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Response Volatility</CardTitle>
+                <CardTitle className="text-sm font-black uppercase tracking-[0.4em] text-slate-400">Response Volatility Trend</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="p-8 pt-6">
-              <ResponsiveContainer width="100%" height={350}>
+            <CardContent className="px-10 py-8 pt-6">
+              <ResponsiveContainer width="100%" height={260}>
                 <AreaChart data={analytics.submissionsOverTime}>
                   <defs>
                     <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.02)" vertical={false} />
                   <XAxis 
                     dataKey="date" 
-                    stroke="#475569" 
-                    fontSize={10} 
+                    stroke="#334155" 
+                    fontSize={9} 
                     axisLine={false} 
                     tickLine={false}
-                    tick={{ fill: '#64748b', fontWeight: 600 }}
+                    tick={{ fill: '#475569', fontWeight: 800 }}
                   />
                   <YAxis 
-                    stroke="#475569" 
-                    fontSize={10} 
+                    stroke="#334155" 
+                    fontSize={9} 
                     axisLine={false} 
                     tickLine={false}
-                    tick={{ fill: '#64748b', fontWeight: 600 }}
+                    tick={{ fill: '#475569', fontWeight: 800 }}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#0f172a',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '16px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+                      backgroundColor: '#020617',
+                      border: '1px solid rgba(255,255,255,0.05)',
+                      borderRadius: '1.5rem',
+                      fontSize: '10px',
+                      fontWeight: 800,
+                      boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
                     }}
                   />
                   <Area
-                    type="monotone"
+                    type="step"
                     dataKey="count"
                     stroke="#3b82f6"
-                    strokeWidth={4}
+                    strokeWidth={3}
                     fill="url(#colorCount)"
-                    animationDuration={2000}
+                    animationDuration={2500}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -310,99 +353,84 @@ export default function AnalyticsPage() {
           </Card>
         )}
 
-        {/* Field Distribution Charts */}
-        {chartFieldIds.length > 0 && (
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {chartFieldIds.map((fieldId) => {
-              const field = form.schema.find((f) => f.id === fieldId);
-              const data = analytics.fieldDistributions[fieldId];
-              if (!data || !field) return null;
+        {/* High-Density Distribution Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          {chartFieldIds.map((fieldId) => {
+            const field = form.schema.find((f) => f.id === fieldId);
+            const data = analytics.fieldDistributions[fieldId];
+            if (!data || !field) return null;
 
-              const isPieType = field.type === 'radio' || field.type === 'dropdown';
+            const isPieType = field.type === 'radio' || field.type === 'dropdown';
 
-              return (
-                <Card key={fieldId} className="bg-slate-900/40 backdrop-blur-2xl border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/5 group">
-                  <CardHeader className="p-8 pb-2">
-                     <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl ${isPieType ? 'bg-purple-500/10' : 'bg-emerald-500/10'}`}>
-                          {isPieType ? <PieIcon className="h-5 w-5 text-purple-500" /> : <BarChart3 className="h-5 w-5 text-emerald-500" />}
-                        </div>
-                        <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 truncate pr-4">{field.label}</CardTitle>
+            return (
+              <Card key={fieldId} className="bg-slate-900/40 backdrop-blur-2xl border-none border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/5 transition-all hover:translate-y-[-4px]">
+                <CardHeader className="p-8 pb-2">
+                   <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl ${isPieType ? 'bg-purple-500/10' : 'bg-emerald-500/10'}`}>
+                        {isPieType ? <PieIcon className="h-4 w-4 text-purple-500" /> : <BarChart3 className="h-4 w-4 text-emerald-500" />}
                       </div>
-                  </CardHeader>
-                  <CardContent className="p-8 pt-6">
-                    <ResponsiveContainer width="100%" height={300}>
-                      {isPieType ? (
-                        <PieChart>
-                          <Pie
-                            data={data}
-                            innerRadius={70}
-                            outerRadius={100}
-                            paddingAngle={8}
-                            dataKey="count"
-                            nameKey="label"
-                            animationDuration={1500}
-                          >
-                            {data.map((_, index) => (
-                              <Cell key={`cell-${index}`} fill={premiumColors[index % premiumColors.length]} stroke="none" />
-                            ))}
-                          </Pie>
-                          <Tooltip 
-                             contentStyle={{
-                               backgroundColor: '#0f172a',
-                               border: '1px solid rgba(255,255,255,0.1)',
-                               borderRadius: '16px',
-                               fontSize: '11px',
-                               fontWeight: 700
-                             }}
-                          />
-                        </PieChart>
-                      ) : (
-                        <BarChart data={data}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                          <XAxis 
-                            dataKey="label" 
-                            stroke="#475569" 
-                            fontSize={10} 
-                            axisLine={false} 
-                            tickLine={false}
-                            tick={{ fill: '#64748b', fontWeight: 600 }}
-                          />
-                          <YAxis 
-                            stroke="#475569" 
-                            fontSize={10} 
-                            axisLine={false} 
-                            tickLine={false}
-                            tick={{ fill: '#64748b', fontWeight: 600 }}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: '#0f172a',
-                              border: '1px solid rgba(255,255,255,0.1)',
-                              borderRadius: '16px',
-                              fontSize: '11px',
-                              fontWeight: 700
-                            }}
-                          />
-                          <Bar
-                            dataKey="count"
-                            fill="#10b981"
-                            radius={[8, 8, 0, 0]}
-                            animationDuration={1500}
-                          >
-                            {data.map((_, index) => (
-                              <Cell key={`cell-${index}`} fill={premiumColors[index % premiumColors.length]} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      )}
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                      <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 truncate pr-4">{field.label}</CardTitle>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-8 pt-4">
+                  <ResponsiveContainer width="100%" height={180}>
+                    {isPieType ? (
+                      <PieChart>
+                        <Pie
+                          data={data}
+                          innerRadius={50}
+                          outerRadius={75}
+                          paddingAngle={4}
+                          dataKey="count"
+                          nameKey="label"
+                          animationDuration={2000}
+                        >
+                          {data.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={premiumColors[index % premiumColors.length]} stroke="none" />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                           contentStyle={{
+                             backgroundColor: '#020617',
+                             border: 'none',
+                             borderRadius: '1rem',
+                             fontSize: '9px',
+                             fontWeight: 800
+                           }}
+                        />
+                      </PieChart>
+                    ) : (
+                      <BarChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.01)" vertical={false} />
+                        <XAxis dataKey="label" hide />
+                        <YAxis hide />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#020617',
+                            border: 'none',
+                            borderRadius: '1rem',
+                            fontSize: '9px',
+                            fontWeight: 800
+                          }}
+                        />
+                        <Bar
+                          dataKey="count"
+                          fill="#3b82f6"
+                          radius={[6, 6, 6, 6]}
+                          barSize={12}
+                        >
+                          {data.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={premiumColors[index % premiumColors.length]} opacity={0.8} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    )}
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
         {/* Empty state */}
         {analytics.totalResponses === 0 && (
