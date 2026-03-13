@@ -19,12 +19,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { loadFromStorage } = useAuthStore();
-
-  useEffect(() => {
-    loadFromStorage();
-  }, [loadFromStorage]);
-
   return (
     <Router>
       <Routes>

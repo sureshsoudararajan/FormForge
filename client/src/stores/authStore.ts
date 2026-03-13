@@ -10,10 +10,20 @@ interface AuthStore {
   loadFromStorage: () => void;
 }
 
+const savedToken = localStorage.getItem('formforge_token');
+const savedUser = localStorage.getItem('formforge_user');
+let initialUser = null;
+try {
+  initialUser = savedUser ? JSON.parse(savedUser) : null;
+} catch {
+  localStorage.removeItem('formforge_token');
+  localStorage.removeItem('formforge_user');
+}
+
 export const useAuthStore = create<AuthStore>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
+  user: initialUser,
+  token: savedToken,
+  isAuthenticated: !!(savedToken && initialUser),
 
   login: (user, token) => {
     localStorage.setItem('formforge_token', token);
