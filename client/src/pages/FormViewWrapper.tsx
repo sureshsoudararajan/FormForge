@@ -30,9 +30,14 @@ export default function FormViewWrapper() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
-        <p className="text-gray-400 font-medium animate-pulse">Loading experience...</p>
+      <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center space-y-6">
+        <div className="relative w-16 h-16">
+          <Loader2 className="w-16 h-16 text-blue-500 animate-spin opacity-20" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Zap className="w-6 h-6 text-blue-500 animate-pulse" />
+          </div>
+        </div>
+        <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px] animate-pulse">Initializing Interface</p>
       </div>
     );
   }

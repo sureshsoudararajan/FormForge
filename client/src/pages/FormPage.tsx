@@ -154,11 +154,13 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
 
   if (error && !form) {
     return (
-      <div className="min-h-screen flex items-center justify-center animated-gradient">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Oops!</h2>
-          <p className="text-muted-foreground">{error}</p>
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4">
+        <div className="text-center p-12 bg-slate-900/50 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 shadow-2xl max-w-sm">
+          <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-10 w-10 text-rose-500" />
+          </div>
+          <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">System Error</h2>
+          <p className="text-slate-400 font-medium leading-relaxed">{error}</p>
         </div>
       </div>
     );
@@ -166,26 +168,27 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center animated-gradient">
-        <div className="text-center glass rounded-2xl p-10 max-w-md mx-4">
-          <div className="h-16 w-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="h-8 w-8 text-green-500" />
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 overflow-hidden relative">
+        <div className="absolute top-[20%] left-[20%] w-[40%] h-[40%] bg-blue-600/20 blur-[120px] rounded-full animate-pulse" />
+        <div className="text-center bg-slate-900/40 backdrop-blur-[50px] rounded-[3rem] p-12 max-w-md mx-4 border border-white/5 shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative z-10">
+          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mx-auto mb-8 shadow-lg shadow-emerald-500/20 rotate-3 transform transition-transform hover:rotate-0 transition-500">
+            <CheckCircle2 className="h-10 w-10 text-slate-950" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">Thank you!</h2>
-          <p className="text-muted-foreground mb-8">Your response has been submitted successfully.</p>
+          <h2 className="text-4xl font-black text-white mb-3 tracking-tighter uppercase">Mission Complete</h2>
+          <p className="text-slate-400 font-medium text-lg mb-10 leading-relaxed">Your data has been successfully archived into our engine.</p>
           
           {onBack && (
             <Button 
               onClick={onBack}
-              className="w-full py-6 rounded-xl bg-white text-black hover:bg-gray-100 font-semibold mb-6"
+              className="w-full py-8 rounded-2xl bg-white text-slate-950 hover:bg-slate-100 font-black text-lg transition-all"
             >
-              Fill Again / Change Mode
+              Start New Discovery
             </Button>
           )}
 
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Zap className="h-4 w-4 text-primary" />
-            Powered by FormForge
+          <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] mt-8">
+            <Zap className="h-3 w-3 text-blue-500" />
+            Powered by FormForge Engine
           </div>
         </div>
       </div>
@@ -195,25 +198,33 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
   if (!form) return null;
 
   return (
-    <div className="min-h-screen animated-gradient py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="glass rounded-2xl p-8 mb-6">
-          <h1 className="text-2xl font-bold mb-1">{form.title}</h1>
+    <div className="min-h-screen bg-[#0f172a] overflow-hidden relative py-12 px-4 selection:bg-blue-500/30">
+      {/* Liquid Mesh Background for Standard Form */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[150px] opacity-10 bg-indigo-600 animate-pulse" />
+        <div className="absolute top-[40%] -right-[15%] w-[40%] h-[40%] rounded-full blur-[150px] opacity-10 bg-blue-600" />
+      </div>
+
+      <div className="max-w-2xl mx-auto relative z-10">
+        <div className="bg-slate-900/40 backdrop-blur-2xl rounded-[2.5rem] p-10 mb-8 border border-white/5 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <h1 className="text-4xl font-black text-white mb-2 tracking-tight">{form.title}</h1>
           {form.description && (
-            <p className="text-muted-foreground">{form.description}</p>
+            <p className="text-slate-400 text-lg leading-relaxed font-medium">{form.description}</p>
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {form.schema.map((field) => (
-            <div key={field.id} className="glass rounded-xl p-6 space-y-2">
-              <label className="text-sm font-medium block">
+            <div key={field.id} className="bg-slate-900/30 backdrop-blur-xl rounded-[2rem] p-8 space-y-4 border border-white/5 shadow-sm hover:border-white/10 transition-all duration-300">
+              <label className="text-sm font-bold text-slate-400 uppercase tracking-widest block">
                 {field.label}
-                {field.required && <span className="text-destructive ml-1">*</span>}
+                {field.required && <span className="text-rose-500 ml-1.5">*</span>}
               </label>
 
               {field.type === 'text' && (
                 <Input
+                  className="bg-slate-950/50 border-white/5 h-14 rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-100 placeholder:text-slate-500"
                   placeholder={field.placeholder}
                   value={values[field.id] || ''}
                   onChange={(e) => setValue(field.id, e.target.value)}
@@ -223,6 +234,7 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
               {field.type === 'email' && (
                 <Input
                   type="email"
+                  className="bg-slate-950/50 border-white/5 h-14 rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-100 placeholder:text-slate-500"
                   placeholder={field.placeholder}
                   value={values[field.id] || ''}
                   onChange={(e) => setValue(field.id, e.target.value)}
@@ -232,6 +244,7 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
               {field.type === 'number' && (
                 <Input
                   type="number"
+                  className="bg-slate-950/50 border-white/5 h-14 rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-100 placeholder:text-slate-500"
                   placeholder={field.placeholder}
                   value={values[field.id] || ''}
                   onChange={(e) => setValue(field.id, e.target.value)}
@@ -242,6 +255,7 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
 
               {field.type === 'textarea' && (
                 <Textarea
+                  className="bg-slate-950/50 border-white/5 min-h-[120px] rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-100 placeholder:text-slate-500 p-4"
                   placeholder={field.placeholder}
                   value={values[field.id] || ''}
                   onChange={(e) => setValue(field.id, e.target.value)}
@@ -251,46 +265,60 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
               {field.type === 'date' && (
                 <Input
                   type="date"
+                  className="bg-slate-950/50 border-white/5 h-14 rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-100"
                   value={values[field.id] || ''}
                   onChange={(e) => setValue(field.id, e.target.value)}
                 />
               )}
 
               {field.type === 'dropdown' && (
-                <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-                  value={values[field.id] || ''}
-                  onChange={(e) => setValue(field.id, e.target.value)}
-                >
-                  <option value="">Select...</option>
-                  {field.options?.map((opt) => (
-                    <option key={opt.id} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <div className="relative group/select">
+                  <select
+                    className="w-full h-14 rounded-2xl border border-white/5 bg-slate-950/50 px-5 text-slate-100 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 outline-none transition-all appearance-none"
+                    value={values[field.id] || ''}
+                    onChange={(e) => setValue(field.id, e.target.value)}
+                  >
+                    <option value="" className="bg-slate-900">Choose an option...</option>
+                    {field.options?.map((opt) => (
+                      <option key={opt.id} value={opt.value} className="bg-slate-900">{opt.label}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-hover/select:text-slate-300 transition-colors">
+                    <Zap className="w-3 h-3" />
+                  </div>
+                </div>
               )}
 
               {field.type === 'radio' && (
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {field.options?.map((opt) => (
-                    <label key={opt.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors">
+                    <label key={opt.id} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${
+                      values[field.id] === opt.value
+                        ? 'bg-blue-600/20 border-blue-500/50 text-white'
+                        : 'bg-slate-950/30 border-white/5 text-slate-400 hover:bg-slate-900/50 hover:border-white/10'
+                    }`}>
                       <input
                         type="radio"
                         name={field.id}
                         value={opt.value}
                         checked={values[field.id] === opt.value}
                         onChange={() => setValue(field.id, opt.value)}
-                        className="accent-primary"
+                        className="w-5 h-5 rounded-full border-white/10 bg-slate-950 checked:bg-blue-600 focus:ring-0"
                       />
-                      <span className="text-sm">{opt.label}</span>
+                      <span className="text-[15px] font-medium tracking-wide">{opt.label}</span>
                     </label>
                   ))}
                 </div>
               )}
 
               {field.type === 'checkbox' && (
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {field.options?.map((opt) => (
-                    <label key={opt.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors">
+                    <label key={opt.id} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${
+                      (values[field.id] || []).includes(opt.value)
+                        ? 'bg-blue-600/20 border-blue-500/50 text-white'
+                        : 'bg-slate-950/30 border-white/5 text-slate-400 hover:bg-slate-900/50 hover:border-white/10'
+                    }`}>
                       <input
                         type="checkbox"
                         value={opt.value}
@@ -303,22 +331,25 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
                             setValue(field.id, current.filter((v: string) => v !== opt.value));
                           }
                         }}
-                        className="accent-primary"
+                        className="w-5 h-5 rounded-lg border-white/10 bg-slate-950 checked:bg-blue-600 focus:ring-0"
                       />
-                      <span className="text-sm">{opt.label}</span>
+                      <span className="text-[15px] font-medium tracking-wide">{opt.label}</span>
                     </label>
                   ))}
                 </div>
               )}
 
               {field.type === 'file' && (
-                <Input
-                  type="file"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) setValue(field.id, file.name);
-                  }}
-                />
+                <div className="flex items-center gap-4">
+                  <Input
+                    type="file"
+                    className="bg-slate-950/50 border-white/5 h-14 rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-400 file:bg-blue-600 file:text-white file:border-none file:rounded-lg file:px-4 file:py-1 file:mr-4 file:hover:bg-blue-500 transition-colors cursor-pointer"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setValue(field.id, file.name);
+                    }}
+                  />
+                </div>
               )}
 
               {field.helpText && (
@@ -339,17 +370,25 @@ export default function FormPage({ id: propId, shareToken, initialData, onBack }
             </div>
           )}
 
-          <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+          <Button 
+            type="submit" 
+            size="lg" 
+            className="w-full py-8 rounded-[2rem] bg-white text-slate-950 hover:bg-slate-100 font-bold text-xl shadow-2xl shadow-white/5 transition-all transform active:scale-[0.98]" 
+            disabled={submitting}
+          >
             {submitting ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Submitting...</>
+              <><Loader2 className="h-6 w-6 mr-3 animate-spin" /> Processing...</>
             ) : (
-              'Submit'
+              'Submit Discovery'
             )}
           </Button>
 
-          <p className="text-center text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1">
-            <Zap className="h-3 w-3 text-primary" /> Powered by FormForge
-          </p>
+          <div className="text-center mt-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-white/5 text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] shadow-inner">
+              <Zap className="h-3 w-3 text-blue-500" />
+              Powered by FormForge Engine
+            </div>
+          </div>
         </form>
       </div>
     </div>
