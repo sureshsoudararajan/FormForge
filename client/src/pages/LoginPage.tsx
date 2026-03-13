@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,57 +33,85 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen animated-gradient flex items-center justify-center p-4">
-      <Card className="w-full max-w-md glass border-white/10">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Zap className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold gradient-text">FormForge</span>
-          </div>
-          <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
-                {error}
+    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-6 relative overflow-hidden selection:bg-blue-500/30">
+      {/* Advanced Liquid Mesh Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[150px] opacity-10 bg-blue-600 animate-pulse" />
+        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full blur-[150px] opacity-10 bg-indigo-600" />
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-md relative z-10"
+      >
+        <Card className="bg-slate-900/40 backdrop-blur-[40px] border border-white/5 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/5">
+          <CardHeader className="text-center pt-10 pb-6 px-10 relative">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-50" />
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="p-3 bg-white text-slate-950 rounded-2xl shadow-xl">
+                <Zap className="h-6 w-6" />
               </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <span className="text-2xl font-black tracking-[0.3em] text-white uppercase">FormForge <span className="text-blue-500">Pro</span></span>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            <CardTitle className="text-3xl font-black text-white tracking-tighter uppercase mb-2">Welcome Back</CardTitle>
+            <CardDescription className="text-slate-400 font-medium tracking-wide">Enter the next generation of data collection</CardDescription>
+          </CardHeader>
+          <CardContent className="px-10 pb-12">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm font-bold uppercase tracking-wider text-center"
+                >
+                  {error}
+                </motion.div>
+              )}
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Identity Access</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  className="bg-slate-950/50 border-white/5 h-14 rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-100 placeholder:text-slate-500"
+                  placeholder="you@formforge.pro"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Secure Key</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  className="bg-slate-950/50 border-white/5 h-14 rounded-2xl focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all text-slate-100 placeholder:text-slate-500"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full py-8 rounded-2xl bg-white text-slate-950 hover:bg-slate-100 font-black text-lg transition-all shadow-2xl active:scale-[0.98]" 
+                disabled={loading}
+              >
+                {loading ? 'Initializing...' : 'Authorize Access'}
+              </Button>
+            </form>
+            <div className="mt-8 text-center">
+              <p className="text-sm font-medium text-slate-500">
+                New to the platform?{' '}
+                <Link to="/register" className="text-blue-400 hover:text-blue-300 font-bold tracking-tight transition-colors">
+                  Create Account
+                </Link>
+              </p>
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary hover:underline">
-              Sign up
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }
