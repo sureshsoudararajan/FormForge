@@ -43,37 +43,42 @@ const getSentimentStyles = (sentiment: string | null) => {
   switch (sentiment) {
     case 'happy':
       return {
-        bg: 'bg-emerald-950/20',
-        glow: 'shadow-[0_0_100px_rgba(16,185,129,0.15)]',
-        border: 'border-emerald-500/30',
+        bg: 'bg-[#0a0f1d]',
+        glow: 'shadow-[0_0_100px_rgba(16,185,129,0.1)]',
+        border: 'border-emerald-500/20',
+        accent: 'from-emerald-500 to-teal-500',
         dot: 'bg-emerald-500'
       };
     case 'frustrated':
       return {
-        bg: 'bg-rose-950/20',
-        glow: 'shadow-[0_0_100px_rgba(244,63,94,0.15)]',
-        border: 'border-rose-500/30',
+        bg: 'bg-[#1a0f0f]',
+        glow: 'shadow-[0_0_100px_rgba(244,63,94,0.1)]',
+        border: 'border-rose-500/20',
+        accent: 'from-rose-500 to-orange-500',
         dot: 'bg-rose-500'
       };
     case 'hurried':
       return {
-        bg: 'bg-amber-950/20',
-        glow: 'shadow-[0_0_100px_rgba(245,158,11,0.15)]',
-        border: 'border-amber-500/30',
+        bg: 'bg-[#1d1a0a]',
+        glow: 'shadow-[0_0_100px_rgba(245,158,11,0.1)]',
+        border: 'border-amber-500/20',
+        accent: 'from-amber-500 to-yellow-500',
         dot: 'bg-amber-500'
       };
     case 'detailed':
       return {
-        bg: 'bg-indigo-950/20',
-        glow: 'shadow-[0_0_100px_rgba(99,102,241,0.15)]',
-        border: 'border-indigo-500/30',
+        bg: 'bg-[#0a0d1d]',
+        glow: 'shadow-[0_0_100px_rgba(99,102,241,0.1)]',
+        border: 'border-indigo-500/20',
+        accent: 'from-indigo-500 to-purple-500',
         dot: 'bg-indigo-500'
       };
     default:
       return {
-        bg: 'bg-gray-950',
-        glow: '',
-        border: 'border-gray-800',
+        bg: 'bg-[#0f172a]', // Slate-900 (Beautiful Dim Blue-Gray)
+        glow: 'shadow-[0_0_150px_rgba(59,130,246,0.08)]',
+        border: 'border-slate-800',
+        accent: 'from-blue-600 to-violet-600',
         dot: 'bg-blue-500'
       };
   }
@@ -469,10 +474,13 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
       )}
       {/* Header - Hidden in Embed Mode */}
       {!isEmbed && (
-        <header className={`px-6 py-4 flex items-center justify-between border-b ${styles.border} bg-gray-950/40 backdrop-blur-md sticky top-0 z-10 transition-colors duration-1000`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full transition-colors duration-1000 ${styles.dot} animate-pulse`} />
-            <h1 className="font-semibold text-gray-200">FormMorph</h1>
+        <header className={`px-8 py-5 flex items-center justify-between border-b ${styles.border} bg-slate-950/40 backdrop-blur-xl sticky top-0 z-10 transition-colors duration-1000`}>
+          <div className="flex items-center gap-4">
+            <div className={`w-2.5 h-2.5 rounded-full transition-colors duration-1000 ${styles.dot} shadow-[0_0_10px_rgba(59,130,246,0.5)]`} />
+            <span className="text-sm font-bold tracking-[0.2em] text-slate-400 uppercase">FormForge Premium</span>
+          </div>
+          <div className="hidden sm:block text-[10px] text-slate-500 font-medium uppercase tracking-widest">
+            AI-Enhanced Experience
           </div>
         </header>
       )}
@@ -489,13 +497,13 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                 className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div 
-                  className={`max-w-[85%] sm:max-w-[75%] px-5 py-3.5 rounded-2xl ${
+                  className={`max-w-[85%] sm:max-w-[75%] px-6 py-4 rounded-[2rem] ${
                     msg.type === 'user' 
-                      ? 'bg-blue-600 text-white rounded-br-sm' 
-                      : 'bg-gray-800 text-gray-100 rounded-bl-sm border border-gray-700/50'
+                      ? `bg-gradient-to-br ${styles.accent} text-white rounded-br-none shadow-lg shadow-blue-500/10` 
+                      : 'bg-slate-800/40 text-slate-100 rounded-bl-none border border-slate-700/50 backdrop-blur-md shadow-sm'
                   }`}
                 >
-                  <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                  <p className="text-[15px] leading-relaxed tracking-wide whitespace-pre-wrap">{msg.content}</p>
                 </div>
               </motion.div>
             ))}
@@ -587,11 +595,11 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                     </div>
                   </motion.div>
                 )}
-                <div className={`bg-gray-900 rounded-2xl border ${isListening ? 'border-red-500 ring-2 ring-red-500/20' : 'border-gray-700 focus-within:border-blue-500'} transition-all flex-1 p-2 flex items-center shadow-lg`}>
+                <div className={`bg-slate-900/80 backdrop-blur-xl rounded-[2rem] border ${isListening ? 'border-rose-500 ring-4 ring-rose-500/10' : `${styles.border} focus-within:border-blue-500/50`} transition-all flex-1 p-3 flex items-center shadow-2xl`}>
                   <button 
                     type="button" 
                     onClick={() => setShowLangMenu(!showLangMenu)}
-                    className={`p-3 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-white'} ${showLangMenu ? 'text-blue-400' : ''}`}
+                    className={`p-3 rounded-full transition-all ${isListening ? 'bg-rose-500 text-white animate-pulse' : 'text-slate-400 hover:text-white hover:bg-slate-800'} ${showLangMenu ? 'text-blue-400 bg-slate-800' : ''}`}
                     title={isListening ? 'Stop recording' : 'Select language and record'}
                   >
                     {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
@@ -607,8 +615,8 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                         handleSend();
                       }
                     }}
-                    placeholder={isListening ? "Listening..." : isTranslating ? "Translating..." : "Type your answer..."}
-                    className="w-full bg-transparent border-none text-gray-100 placeholder:text-gray-500 px-2 py-3 focus:outline-none resize-none min-h-[50px] max-h-32 text-[15px]"
+                    placeholder={isListening ? "I'm listening..." : isTranslating ? "Translating naturally..." : "Type your answer..."}
+                    className="w-full bg-transparent border-none text-slate-100 placeholder:text-slate-500 px-4 py-3 focus:outline-none resize-none min-h-[50px] max-h-32 text-[15px] leading-relaxed"
                     rows={1}
                     autoFocus
                   />
@@ -619,12 +627,12 @@ export default function ConversationalFormPage({ shareToken: propToken, initialD
                       handleSend();
                     }}
                     disabled={!inputValue.trim()}
-                    className="p-3"
+                    className="ml-2"
                   >
-                    <div className={`p-2 rounded-xl transition-all ${
+                    <div className={`p-3 rounded-full transition-all duration-300 ${
                       inputValue.trim() 
-                        ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-md' 
-                        : 'bg-gray-800 text-gray-500'
+                        ? 'bg-slate-100 text-slate-900 hover:scale-110 shadow-lg' 
+                        : 'bg-slate-800 text-slate-500 grayscale opacity-50'
                     }`}>
                       <Send className="w-5 h-5" />
                     </div>
